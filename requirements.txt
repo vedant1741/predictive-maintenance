@@ -7,7 +7,6 @@ plotly
 joblib
 xgboost
 lightgbm
-tensorflow
 keras
 pyserial
 pymongo
