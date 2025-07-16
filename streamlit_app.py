@@ -1,59 +1,66 @@
 import streamlit as st
 import pandas as pd
-import joblib
 import numpy as np
+import joblib
 
-# Load the trained model once using caching
+# Load the trained model with caching
 @st.cache_resource
 def load_model():
     return joblib.load("printer_predictive_model.pkl")
 
 model = load_model()
 
-# App title and description
-st.set_page_config(page_title="Predictive Maintenance", layout="centered")
-
-st.title("🔧 Predictive Maintenance for Machines")
-st.markdown("This AI-based tool predicts whether a machine is likely to fail based on sensor data.")
+# Set page layout and title
+st.set_page_config(page_title="3D Printer Predictive Maintenance", layout="centered")
+st.title("🧠 Predictive Maintenance for 3D Printers")
+st.markdown("Enter sensor data from your 3D printer to predict potential faults.")
 
 # Sidebar info
 with st.sidebar:
     st.header("ℹ️ About")
-    st.write("This app uses a Random Forest model trained on historical sensor data to predict machine failures.")
-    st.write("Developed by Vedant Joshi")
-    st.markdown("[📂 View Source Code](https://github.com/vedant1741/predictive-maintenance)")
-
-st.subheader("📊 Input Machine Sensor Readings")
+    st.write("This model predicts specific faults in 3D printers using 9 sensor readings.")
+    st.markdown("[📂 GitHub Repository](https://github.com/vedant1741/predictive-maintenance)")
 
 # Input form
 with st.form("input_form"):
     col1, col2 = st.columns(2)
 
     with col1:
-        air_temp = st.number_input("🌡️ Air Temperature (K)", value=300.0)
-        process_temp = st.number_input("🔥 Process Temperature (K)", value=310.0)
-        torque = st.number_input("🔩 Torque (Nm)", value=40.0)
-    
-    with col2:
-        rot_speed = st.number_input("⚙️ Rotational Speed (rpm)", value=1500)
-        tool_wear = st.number_input("🛠️ Tool Wear (min)", value=100)
-        type_map = {"L": 0, "M": 1, "H": 2}
-        type_input = st.selectbox("🧪 Product Type", options=list(type_map.keys()))
+        x_temp = st.number_input("X Stepper Temp (°C)", value=40.0)
+        y_temp = st.number_input("Y Stepper Temp (°C)", value=40.0)
+        z_temp = st.number_input("Z Stepper Temp (°C)", value=40.0)
+        extruder_temp = st.number_input("Extruder Temp (°C)", value=200.0)
+        hotend_temp = st.number_input("Hotend Temp (°C)", value=210.0)
 
-    submitted = st.form_submit_button("🚀 Predict Failure")
+    with col2:
+        bed_temp = st.number_input("Bed Temp (°C)", value=60.0)
+        current = st.number_input("MainBoard Current (A)", value=1.5)
+        vibration = st.number_input("Vibration Level", value=0.02, step=0.001)
+        speed = st.number_input("Print Speed (mm/s)", value=50.0)
+
+    submitted = st.form_submit_button("🚀 Predict Fault")
 
 if submitted:
-    input_data = np.array([[air_temp, process_temp, rot_speed, torque, tool_wear, type_map[type_input]]])
+    input_data = pd.DataFrame([[
+        x_temp, y_temp, z_temp,
+        extruder_temp, hotend_temp,
+        bed_temp, current, vibration, speed
+    ]], columns=[
+        'X_Stepper_Temp', 'Y_Stepper_Temp', 'Z_Stepper_Temp',
+        'Extruder_Temp', 'Hotend_Temp',
+        'Bed_Temp', 'Current_MainBoard',
+        'Vibration_Level', 'Print_Speed'
+    ])
+
     prediction = model.predict(input_data)[0]
-    prob = model.predict_proba(input_data)[0][1]
+    prediction_proba = model.predict_proba(input_data)
 
     st.markdown("### 🧾 Prediction Result")
-    if prediction == 1:
-        st.error("⚠️ Machine is likely to **FAIL**. Please schedule maintenance.")
-    else:
-        st.success("✅ Machine is **OK**. No immediate maintenance needed.")
-
-    st.markdown(f"**Model Confidence:** {prob*100:.2f}%")
+    st.success(f"📌 Predicted Fault: **{prediction}**")
 
     with st.expander("🔍 View Input Data"):
-        st.write(pd.DataFrame(input_data, columns=["Air Temp", "Process Temp", "Rot Speed", "Torque", "Tool Wear", "Type"]))
+        st.dataframe(input_data)
+
+    with st.expander("📊 View Probabilities"):
+        proba_df = pd.DataFrame(prediction_proba, columns=model.classes_)
+        st.dataframe(proba_df.style.highlight_max(axis=1, color='lightgreen'))
