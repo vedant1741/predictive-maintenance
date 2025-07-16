@@ -6,7 +6,7 @@ import numpy as np
 # Load the trained model once using caching
 @st.cache_resource
 def load_model():
-    return joblib.load("model.pkl")
+    return joblib.load("printer_predctive_model.pkl")
 
 model = load_model()
 
