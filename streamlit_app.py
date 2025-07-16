@@ -57,21 +57,3 @@ if submitted:
 
     with st.expander("🔍 View Input Data"):
         st.write(pd.DataFrame(input_data, columns=["Air Temp", "Process Temp", "Rot Speed", "Torque", "Tool Wear", "Type"]))
-
----
-
-### ✅ Additional Steps
-
-1. Add this `streamlit_app.py` file to your repo (replace the existing one).
-2. Commit & push changes to GitHub.
-3. Streamlit Community Cloud will auto-deploy it.
-
----
-
-### 💡 Optional Improvements Later
-
-- Add upload CSV feature to predict in batch
-- Visualize data (e.g., using Seaborn or Plotly)
-- Add logging or feedback form
-
-Would you like me to help add **charts** or **batch prediction from CSV** next?
