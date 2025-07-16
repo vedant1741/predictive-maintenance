@@ -26,7 +26,6 @@ with st.form("input_form"):
     col1, col2 = st.columns(2)
 
     with col1:
-        index = st.number_input("ID / Record Number (`Unnamed: 0`)", value=0, step=1)
         x_temp = st.number_input("X Stepper Temp (°C)", value=40.0)
         y_temp = st.number_input("Y Stepper Temp (°C)", value=40.0)
         z_temp = st.number_input("Z Stepper Temp (°C)", value=40.0)
